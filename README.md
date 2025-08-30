@@ -221,4 +221,4 @@ cd frontend && npm test
 
 ## License
 
-This project is for educational and portfolio demonstration purposes.
+This project is for educational and portfolio 
