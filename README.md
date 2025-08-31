@@ -105,9 +105,7 @@ NODE_ENV=development
 │   │   ├── services/         # API communication
 │   │   ├── utils/            # Helper functions
 │   │   └── App.js            # Main app component
-│   └── package.json          # Frontend dependencies
-├── .kiro/                    # Kiro IDE configuration
-│   └── specs/                # Project specifications
+│   └── package.json          # Frontend dependencies                
 └── README.md                 # Project documentation
 ```
 
@@ -212,7 +210,7 @@ cd frontend && npm test
 ```
 
 ## Contributing
-
+🤝 Contributions are welcome! Feel free to fork the repo, raise issues, and submit pull requests.
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -220,5 +218,7 @@ cd frontend && npm test
 5. Open a Pull Request
 
 ## License
+This is a **personal project** created for educational and portfolio purposes only.  
+Unauthorized copying, modification, or redistribution of this project for personal/commercial use is prohibited.  
 
-This project is for educational and portfolio 
+🤝 However, you are welcome to **contribute** by suggesting improvements, fixing bugs, or adding features via pull requests. 
