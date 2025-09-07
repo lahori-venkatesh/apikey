@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
+  const [openFAQ, setOpenFAQ] = useState(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -67,6 +68,45 @@ const Home = () => {
       name: "Jessica Park"
     }
   ];
+
+  const faqs = [
+    {
+      question: "How does your encryption work?",
+      answer: "We use AES-256 encryption for all API keys at rest and TLS 1.3 for data in transit. Keys are encrypted using hardware security modules (HSMs) and split across multiple secure locations. Each key has its own encryption key, ensuring that even if one is compromised, others remain secure."
+    },
+    {
+      question: "What happens if I forget my master password?",
+      answer: "We provide secure account recovery options through verified backup methods you set up during registration. This includes encrypted recovery keys and verified secondary authentication methods. We never store your master password, so the recovery process ensures only you can regain access to your account."
+    },
+    {
+      question: "Can I integrate with my existing CI/CD pipeline?",
+      answer: "Yes! We provide native integrations for popular CI/CD platforms including GitHub Actions, GitLab CI, Jenkins, and CircleCI. We also offer REST APIs, CLI tools, and SDKs for custom integrations. Your keys can be securely injected into your build and deployment processes without exposing them in code."
+    },
+    {
+      question: "What compliance standards do you meet?",
+      answer: "Our platform is SOC 2 Type II compliant, GDPR compliant, and meets HIPAA requirements. We also support PCI DSS standards and provide comprehensive audit logs for compliance reporting. Our security practices are regularly audited by third-party security firms."
+    },
+    {
+      question: "How do you handle API key rotation?",
+      answer: "We support both manual and automated key rotation. You can set rotation policies based on time intervals, usage thresholds, or security events. When keys are rotated, we provide overlap periods and webhook notifications to ensure seamless transitions without service disruption."
+    },
+    {
+      question: "What's included in the free trial?",
+      answer: "The 14-day free trial includes full access to all enterprise features: unlimited API keys, team collaboration, usage analytics, automated rotation, and premium support. No credit card required to start, and you can upgrade or cancel anytime during or after the trial period."
+    },
+    {
+      question: "How do you prevent unauthorized access?",
+      answer: "We use multi-factor authentication, IP whitelisting, device fingerprinting, and behavioral analysis to detect unauthorized access attempts. Our zero-trust architecture requires verification for every access request, and we provide real-time alerts for suspicious activities."
+    },
+    {
+      question: "Can I export my data if I need to leave?",
+      answer: "Absolutely. We believe in data portability and provide comprehensive export tools. You can export all your API keys (encrypted), usage analytics, audit logs, and configuration settings in standard formats. We also offer migration assistance to help with the transition process."
+    }
+  ];
+
+  const toggleFAQ = (index) => {
+    setOpenFAQ(openFAQ === index ? null : index);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -314,6 +354,70 @@ const Home = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 lg:py-32 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-gray-600">
+              Get answers to common questions about our API key management platform
+            </p>
+          </div>
+          
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 transition-colors duration-200"
+              >
+                <button
+                  className="w-full px-6 py-5 text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                  onClick={() => toggleFAQ(index)}
+                >
+                  <span className="text-lg font-semibold text-gray-900 pr-4">
+                    {faq.question}
+                  </span>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transform transition-transform duration-200 flex-shrink-0 ${
+                      openFAQ === index ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <div
+                  className={`transition-all duration-300 ease-in-out ${
+                    openFAQ === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  } overflow-hidden`}
+                >
+                  <div className="px-6 pb-5">
+                    <p className="text-gray-600 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <p className="text-gray-600 mb-4">Still have questions?</p>
+            <button className="inline-flex items-center px-6 py-3 border border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors duration-200">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              Contact Support
+            </button>
           </div>
         </div>
       </section>
