@@ -53,6 +53,45 @@ const Sidebar = ({ isOpen, onClose }) => {
     }
   ];
 
+  const profileMenuItems = [
+    {
+      name: 'Profile Settings',
+      path: '/dashboard/profile',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      )
+    },
+    {
+      name: 'Billing & Usage',
+      path: '/dashboard/billing',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+      )
+    },
+    {
+      name: 'API Documentation',
+      path: '/dashboard/docs',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      )
+    },
+    {
+      name: 'Help & Support',
+      path: '/dashboard/support',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    }
+  ];
+
   const isActive = (path) => {
     if (path === '/dashboard') {
       return location.pathname === '/dashboard';
@@ -86,6 +125,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
 
         <nav className="mt-8 px-5 flex-1 overflow-y-auto lg:mt-20">
+          {/* Main Navigation */}
           <div className="space-y-3">
             {menuItems.map((item) => (
               <Link
@@ -105,6 +145,32 @@ const Sidebar = ({ isOpen, onClose }) => {
               </Link>
             ))}
           </div>
+
+          {/* Profile Section */}
+          <div className="mt-8 pt-8 border-t border-gray-200">
+            <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              Account
+            </h3>
+            <div className="space-y-3">
+              {profileMenuItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={() => window.innerWidth < 1024 && onClose()}
+                  className={`flex items-center px-4 py-3 text-base font-medium rounded-lg transition-colors ${
+                    isActive(item.path)
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <span className={`mr-4 ${isActive(item.path) ? 'text-blue-700' : 'text-gray-400'}`}>
+                    {item.icon}
+                  </span>
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
         </nav>
 
         {/* Upgrade section */}
@@ -119,7 +185,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               className="w-full bg-white text-blue-600 text-sm font-medium py-3 px-4 rounded-md hover:bg-blue-50 transition-colors block text-center"
               onClick={() => window.innerWidth < 1024 && onClose()}
             >
-              Upgrade to Pro - $9/month
+              Upgrade to Pro - ₹399/month
             </Link>
           </div>
         </div>

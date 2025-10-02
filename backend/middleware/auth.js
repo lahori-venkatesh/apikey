@@ -1,5 +1,5 @@
 const jwtService = require('../services/jwtService');
-const User = require('../models/User');
+const tempStorage = require('../temp-storage');
 
 /**
  * Authentication middleware to verify JWT tokens
@@ -25,8 +25,9 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = jwtService.verifyToken(token);
     
-    // Get user from database
-    const user = await User.findById(decoded.userId);
+    // Get user from temp storage
+    const user = tempStorage.findUserById(decoded.userId);
+    
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -40,7 +41,7 @@ const authenticate = async (req, res, next) => {
 
     // Add user to request object
     req.user = user;
-    req.userId = user._id.toString();
+    req.userId = user._id;
     
     next();
   } catch (error) {
@@ -78,10 +79,10 @@ const optionalAuth = async (req, res, next) => {
     const token = authHeader.substring(7);
     const decoded = jwtService.verifyToken(token);
     
-    const user = await User.findById(decoded.userId);
+    const user = tempStorage.findUserById(decoded.userId);
     if (user) {
       req.user = user;
-      req.userId = user._id.toString();
+      req.userId = user._id;
     }
     
     next();

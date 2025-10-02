@@ -16,7 +16,6 @@ const usageSchema = new mongoose.Schema({
   date: {
     type: Date,
     required: true,
-    index: true,
     default: () => {
       const today = new Date();
       return new Date(today.getFullYear(), today.getMonth(), today.getDate());

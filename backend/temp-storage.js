@@ -15,7 +15,12 @@ const tempStorage = {
       id: userId.toString(),
       ...userData,
       createdAt: new Date(),
-      lastLogin: new Date()
+      lastLogin: new Date(),
+      // Handle Google OAuth users (no password required)
+      password: userData.password || null,
+      googleId: userData.googleId || null,
+      avatar: userData.avatar || null,
+      emailVerified: userData.emailVerified || false
     };
     users.set(user.email, user);
     return user;
@@ -138,5 +143,8 @@ const tempStorage = {
     };
   }
 };
+
+// Export users map for debugging
+tempStorage.users = users;
 
 module.exports = tempStorage;

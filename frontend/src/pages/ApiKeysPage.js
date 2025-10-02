@@ -24,19 +24,27 @@ const ApiKeysPage = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setApiKeys(data);
+        console.log('API Keys Response:', data); // Debug log
+        // Handle the new API response format that returns {keys: [], pagination: {}}
+        const keys = data.keys || data || [];
+        setApiKeys(Array.isArray(keys) ? keys : []);
       } else {
         showError('Failed to fetch API keys');
+        setApiKeys([]);
       }
     } catch (error) {
       showError('Network error. Please try again.');
+      setApiKeys([]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleApiKeyCreated = (newKey) => {
-    setApiKeys(prev => [newKey, ...prev]);
+    setApiKeys(prev => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      return [newKey, ...safePrev];
+    });
     setShowCreateModal(false);
   };
 
@@ -54,7 +62,10 @@ const ApiKeysPage = () => {
       });
       
       if (response.ok) {
-        setApiKeys(prev => prev.filter(key => key._id !== keyId));
+        setApiKeys(prev => {
+          const safePrev = Array.isArray(prev) ? prev : [];
+          return safePrev.filter(key => key._id !== keyId);
+        });
         showSuccess('API key deleted successfully!');
       } else {
         showError('Failed to delete API key');
@@ -95,8 +106,11 @@ const ApiKeysPage = () => {
     }
   };
 
-  const filteredKeys = apiKeys.filter(key => {
-    const matchesSearch = key.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  // Ensure apiKeys is always an array to prevent filter errors
+  const safeApiKeys = Array.isArray(apiKeys) ? apiKeys : [];
+  
+  const filteredKeys = safeApiKeys.filter(key => {
+    const matchesSearch = key.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          key.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesEnvironment = filterEnvironment === 'all' || key.environment === filterEnvironment;
     const matchesStatus = filterStatus === 'all' || 
@@ -165,15 +179,33 @@ const ApiKeysPage = () => {
             <h1 className="text-2xl font-bold text-gray-900">API Keys</h1>
             <p className="text-gray-600 mt-1">Securely store and manage API keys from OpenAI, Claude, Gemini, and other AI services</p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="mt-4 sm:mt-0 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            <span>Add API Key</span>
-          </button>
+          <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+            <div className="text-sm text-gray-500">
+              {safeApiKeys.length}/5 free keys used
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              disabled={safeApiKeys.length >= 5}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                safeApiKeys.length >= 5 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span>{safeApiKeys.length >= 5 ? 'Limit Reached' : 'Add API Key'}</span>
+            </button>
+            {safeApiKeys.length >= 5 && (
+              <a 
+                href="/pricing" 
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                Upgrade to Pro
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
@@ -240,12 +272,12 @@ const ApiKeysPage = () => {
             </svg>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No API keys stored</h3>
             <p className="text-gray-500 mb-4">
-              {apiKeys.length === 0 
+              {safeApiKeys.length === 0 
                 ? "Add your first API key from services like OpenAI, Claude, or Gemini to get started" 
                 : "No API keys match your current filters"
               }
             </p>
-            {apiKeys.length === 0 && (
+            {safeApiKeys.length === 0 && (
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -363,6 +395,7 @@ const ApiKeysPage = () => {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onApiKeyCreated={handleApiKeyCreated}
+        currentKeyCount={safeApiKeys.length}
       />
     </div>
   );

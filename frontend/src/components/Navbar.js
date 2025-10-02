@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import RealtimeNotifications from './RealtimeNotifications';
 
 const Navbar = ({ isAuthenticated, onLogout, user }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const location = useLocation();
   const profileMenuRef = useRef(null);
+
+  // Debug user data
+  console.log('Navbar - isAuthenticated:', isAuthenticated, 'user:', user);
 
   const isActive = (path) => location.pathname === path;
 
@@ -73,14 +77,8 @@ const Navbar = ({ isAuthenticated, onLogout, user }) => {
               </>
             ) : (
               <div className="flex items-center space-x-4">
-                {/* Notifications */}
-                <button className="text-gray-400 hover:text-gray-600 relative p-2 rounded-lg hover:bg-gray-50">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19h6v-2H4v2zM16 3H4v2h12V3zM4 7h12v2H4V7zM4 11h12v2H4v-2z" />
-                  </svg>
-                  {/* Notification badge */}
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
+                {/* Real-time Notifications */}
+                <RealtimeNotifications />
                 
                 {/* Profile Menu */}
                 <div className="relative" ref={profileMenuRef}>
@@ -117,13 +115,13 @@ const Navbar = ({ isAuthenticated, onLogout, user }) => {
                         </svg>
                         Dashboard
                       </Link>
-                      <a href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <Link to="/dashboard/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         Profile Settings
-                      </a>
-                      <Link to="/pricing" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      </Link>
+                      <Link to="/dashboard/billing" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         <svg className="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
@@ -210,8 +208,8 @@ const Navbar = ({ isAuthenticated, onLogout, user }) => {
                     </div>
                   </div>
                   <Link to="/dashboard" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Dashboard</Link>
-                  <a href="#" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Profile Settings</a>
-                  <a href="#" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Billing & Usage</a>
+                  <Link to="/dashboard/profile" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Profile Settings</Link>
+                  <Link to="/dashboard/billing" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Billing & Usage</Link>
                   <button onClick={onLogout} className="block w-full text-left px-3 py-2 text-red-600 hover:text-red-700">Sign out</button>
                 </div>
               )}

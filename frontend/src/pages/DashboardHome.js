@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
+import { useWebSocket } from '../contexts/WebSocketContext';
 import CreateApiKeyModal from '../components/CreateApiKeyModal';
+import RealtimeUsageDashboard from '../components/RealtimeUsageDashboard';
 
 const DashboardHome = () => {
   const [stats, setStats] = useState({
@@ -22,37 +24,81 @@ const DashboardHome = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsResponse, keysResponse] = await Promise.all([
-        fetch('/api/usage/stats', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        }),
-        fetch('/api/keys', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        })
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showError('Please log in again');
+        return;
+      }
+
+      // Set default values first
+      setStats({
+        totalKeys: 0,
+        activeKeys: 0,
+        todayCalls: 0,
+        successRate: 0,
+        avgResponseTime: 0
+      });
+
+      // Set default activity
+      setRecentActivity([
+        { id: 1, action: 'Welcome to API Key Manager', key: 'Get started by adding your first API key', time: 'Just now', type: 'create' },
+        { id: 2, action: 'Secure Storage', key: 'Your API keys are encrypted with your passphrase', time: 'Always', type: 'info' },
+        { id: 3, action: 'Real-time Monitoring', key: 'Track usage and performance in real-time', time: 'Available', type: 'info' }
       ]);
 
-      if (statsResponse.ok && keysResponse.ok) {
-        const statsData = await statsResponse.json();
-        const keysData = await keysResponse.json();
-        
-        setStats({
-          totalKeys: keysData.length,
-          activeKeys: keysData.filter(key => key.isActive).length,
-          todayCalls: statsData.todayCalls || 0,
-          successRate: statsData.successRate || 0,
-          avgResponseTime: statsData.avgResponseTime || 0
-        });
+      // Try to fetch real data
+      const [statsResponse, keysResponse] = await Promise.all([
+        fetch('/api/usage/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(err => ({ ok: false, error: err })),
+        fetch('/api/keys', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(err => ({ ok: false, error: err }))
+      ]);
 
-        // Mock recent activity for now
+      let statsData = { todayCalls: 0, successRate: 0, avgResponseTime: 0 };
+      let keys = [];
+
+      // Handle stats response
+      if (statsResponse.ok) {
+        try {
+          statsData = await statsResponse.json();
+        } catch (e) {
+          console.warn('Failed to parse stats response');
+        }
+      }
+
+      // Handle keys response
+      if (keysResponse.ok) {
+        try {
+          const keysData = await keysResponse.json();
+          keys = keysData.keys || keysData || [];
+        } catch (e) {
+          console.warn('Failed to parse keys response');
+        }
+      }
+      
+      // Update stats with real data
+      setStats({
+        totalKeys: keys.length,
+        activeKeys: keys.filter(key => key.isActive || key.status === 'active').length,
+        todayCalls: statsData.todayCalls || 0,
+        successRate: statsData.successRate || 0,
+        avgResponseTime: statsData.avgResponseTime || 0
+      });
+
+      // If we have keys, show real activity
+      if (keys.length > 0) {
         setRecentActivity([
-          { id: 1, action: 'API Key Added', key: 'OpenAI GPT-4 - Production', time: '2 hours ago', type: 'create' },
-          { id: 2, action: 'API Call', key: 'Claude 3 - Development', time: '5 minutes ago', type: 'call' },
-          { id: 3, action: 'Usage Alert', key: 'Gemini Pro - Production', time: '1 hour ago', type: 'warning' },
-          { id: 4, action: 'Key Updated', key: 'Stability AI - Production', time: '3 hours ago', type: 'rotate' }
+          { id: 1, action: 'API Keys Loaded', key: `${keys.length} API key(s) found`, time: 'Just now', type: 'create' },
+          { id: 2, action: 'Dashboard Ready', key: 'All systems operational', time: 'Now', type: 'info' }
         ]);
       }
+
     } catch (error) {
-      showError('Failed to fetch dashboard data');
+      console.error('Error fetching dashboard data:', error);
+      // Don't show error for dashboard - just use defaults
+      console.log('Using default dashboard data');
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +135,14 @@ const DashboardHome = () => {
           <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
             <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+        );
+      case 'info':
+        return (
+          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         );
@@ -197,6 +251,12 @@ const DashboardHome = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Real-time Usage Dashboard */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Real-time Activity</h2>
+        <RealtimeUsageDashboard />
       </div>
 
       {/* Quick Actions */}

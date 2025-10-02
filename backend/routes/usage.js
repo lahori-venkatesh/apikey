@@ -3,6 +3,8 @@ const Usage = require('../models/Usage');
 const ApiKey = require('../models/ApiKey');
 const { authenticate } = require('../middleware/auth');
 const tempStorage = require('../temp-storage');
+const realtimeUsageService = require('../services/realtimeUsageService');
+const websocketService = require('../services/websocketService');
 
 const router = express.Router();
 
@@ -73,10 +75,13 @@ router.post('/record', authenticate, async (req, res) => {
   try {
     const {
       apiKeyId,
+      service,
       endpoint,
       method,
       statusCode,
       responseTime,
+      requestSize,
+      responseSize,
       userAgent,
       ipAddress
     } = req.body;
@@ -88,13 +93,16 @@ router.post('/record', authenticate, async (req, res) => {
       return res.status(404).json({ message: 'API key not found' });
     }
 
-    // Create usage record
-    tempStorage.createUsage({
+    // Track usage in real-time service
+    await realtimeUsageService.trackUsage(req.userId, {
       apiKeyId,
+      service: service || apiKey.service,
       endpoint,
       method,
       statusCode,
       responseTime,
+      requestSize,
+      responseSize,
       userAgent,
       ipAddress
     });
@@ -103,6 +111,40 @@ router.post('/record', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Error recording usage:', error);
     res.status(500).json({ message: 'Server error recording usage' });
+  }
+});
+
+// Get real-time usage statistics
+router.get('/realtime', authenticate, async (req, res) => {
+  try {
+    const stats = realtimeUsageService.getCachedStats(req.userId);
+    if (stats) {
+      res.json(stats);
+    } else {
+      // Calculate fresh stats if not cached
+      const freshStats = await realtimeUsageService.calculateRealtimeStats(req.userId);
+      res.json(freshStats || {});
+    }
+  } catch (error) {
+    console.error('Error fetching real-time usage:', error);
+    res.status(500).json({ message: 'Server error fetching real-time usage' });
+  }
+});
+
+// Generate usage report
+router.get('/report', authenticate, async (req, res) => {
+  try {
+    const { period = '24h' } = req.query;
+    const report = await realtimeUsageService.generateUsageReport(req.userId, period);
+    
+    if (report) {
+      res.json(report);
+    } else {
+      res.status(404).json({ message: 'No usage data found for the specified period' });
+    }
+  } catch (error) {
+    console.error('Error generating usage report:', error);
+    res.status(500).json({ message: 'Server error generating usage report' });
   }
 });
 

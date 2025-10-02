@@ -16,7 +16,7 @@ class EncryptionService {
   encryptApiKey(plainKey) {
     try {
       const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipher(this.algorithm, this.key);
+      const cipher = crypto.createCipheriv('aes-256-cbc', this.key, iv);
       
       let encrypted = cipher.update(plainKey, 'utf8', 'hex');
       encrypted += cipher.final('hex');
@@ -43,7 +43,7 @@ class EncryptionService {
       const iv = Buffer.from(parts[0], 'hex');
       const encryptedData = parts[1];
       
-      const decipher = crypto.createDecipher(this.algorithm, this.key);
+      const decipher = crypto.createDecipheriv('aes-256-cbc', this.key, iv);
       
       let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
@@ -51,6 +51,63 @@ class EncryptionService {
       return decrypted;
     } catch (error) {
       throw new Error(`Error decrypting API key: ${error.message}`);
+    }
+  }
+
+  /**
+   * Encrypts an API key using a user-provided passphrase
+   * @param {string} plainKey - The plain text API key
+   * @param {string} passphrase - User-provided passphrase
+   * @returns {string} The encrypted API key
+   */
+  encryptApiKeyWithPassphrase(plainKey, passphrase) {
+    try {
+      const iv = crypto.randomBytes(16);
+      const salt = crypto.randomBytes(32);
+      
+      // Derive key from passphrase using PBKDF2
+      const key = crypto.pbkdf2Sync(passphrase, salt, 100000, 32, 'sha512');
+      
+      const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+      
+      let encrypted = cipher.update(plainKey, 'utf8', 'hex');
+      encrypted += cipher.final('hex');
+      
+      // Combine salt, IV, and encrypted data
+      return salt.toString('hex') + ':' + iv.toString('hex') + ':' + encrypted;
+    } catch (error) {
+      throw new Error(`Error encrypting API key with passphrase: ${error.message}`);
+    }
+  }
+
+  /**
+   * Decrypts an API key using a user-provided passphrase
+   * @param {string} encryptedKey - The encrypted API key
+   * @param {string} passphrase - User-provided passphrase
+   * @returns {string} The decrypted plain text API key
+   */
+  decryptApiKeyWithPassphrase(encryptedKey, passphrase) {
+    try {
+      const parts = encryptedKey.split(':');
+      if (parts.length !== 3) {
+        throw new Error('Invalid encrypted key format');
+      }
+
+      const salt = Buffer.from(parts[0], 'hex');
+      const iv = Buffer.from(parts[1], 'hex');
+      const encryptedData = parts[2];
+      
+      // Derive key from passphrase using same parameters
+      const key = crypto.pbkdf2Sync(passphrase, salt, 100000, 32, 'sha512');
+      
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+      
+      let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      
+      return decrypted;
+    } catch (error) {
+      throw new Error(`Error decrypting API key with passphrase: ${error.message}`);
     }
   }
 

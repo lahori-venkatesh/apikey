@@ -4,7 +4,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import WebSocketManager from './components/WebSocketManager';
 import { ToastProvider } from './contexts/ToastContext';
+import { WebSocketProvider } from './contexts/WebSocketContext';
 
 // Pages
 import Home from './pages/Home';
@@ -31,9 +33,12 @@ function App() {
       })
       .then(response => response.json())
       .then(data => {
+        console.log('Token verification response:', data);
         if (data.user) {
+          console.log('Setting user from token verification:', data.user);
           setUser(data.user);
         } else {
+          console.log('No user data in verification response');
           localStorage.removeItem('token');
         }
       })
@@ -49,10 +54,12 @@ function App() {
   }, []);
 
   const handleLogin = (userData) => {
+    console.log('Login - User data received:', userData);
     setUser(userData);
   };
 
   const handleSignup = (userData) => {
+    console.log('Signup - User data received:', userData);
     setUser(userData);
   };
 
@@ -71,41 +78,44 @@ function App() {
 
   return (
     <ToastProvider>
-      <Router>
-        <div className="App min-h-screen flex flex-col">
-          <Navbar isAuthenticated={!!user} onLogout={handleLogout} />
-          
-          <main className="flex-grow">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Home />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/pricing" element={<Pricing />} />
-              
-              {/* Auth Routes */}
-              <Route 
-                path="/login" 
-                element={user ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />} 
-              />
-              <Route 
-                path="/signup" 
-                element={user ? <Navigate to="/dashboard" /> : <Signup onSignup={handleSignup} />} 
-              />
-              
-              {/* Protected Routes */}
-              <Route 
-                path="/dashboard/*" 
-                element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
-              />
-              
-              {/* Catch all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          
-          {!user && <Footer />}
-        </div>
-      </Router>
+      <WebSocketProvider>
+        <Router>
+          <div className="App min-h-screen flex flex-col">
+            <WebSocketManager user={user} />
+            <Navbar isAuthenticated={!!user} onLogout={handleLogout} user={user} />
+            
+            <main className="flex-grow">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Home />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/pricing" element={<Pricing isAuthenticated={!!user} />} />
+                
+                {/* Auth Routes */}
+                <Route 
+                  path="/login" 
+                  element={user ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />} 
+                />
+                <Route 
+                  path="/signup" 
+                  element={user ? <Navigate to="/dashboard" /> : <Signup onSignup={handleSignup} />} 
+                />
+                
+                {/* Protected Routes */}
+                <Route 
+                  path="/dashboard/*" 
+                  element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} 
+                />
+                
+                {/* Catch all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            
+            {!user && <Footer />}
+          </div>
+        </Router>
+      </WebSocketProvider>
     </ToastProvider>
   );
 }

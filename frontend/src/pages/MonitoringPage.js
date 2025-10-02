@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import SystemMonitor from '../components/SystemMonitor';
+import RealtimeUsageDashboard from '../components/RealtimeUsageDashboard';
 
 const MonitoringPage = () => {
   const [alerts, setAlerts] = useState([
@@ -304,17 +306,13 @@ const MonitoringPage = () => {
         )}
       </div>
 
-      {/* Performance Chart Placeholder */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Metrics</h3>
-        <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <p className="text-gray-500">Real-time performance charts coming soon</p>
-          </div>
-        </div>
+      {/* System Monitor */}
+      <SystemMonitor />
+
+      {/* Real-time Usage Dashboard */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Real-time Usage Monitoring</h3>
+        <RealtimeUsageDashboard />
       </div>
     </div>
   );

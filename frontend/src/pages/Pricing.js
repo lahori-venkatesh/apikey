@@ -26,8 +26,8 @@ const Pricing = ({ isAuthenticated }) => {
     {
       name: "Professional",
       description: "Ideal for growing teams and production applications",
-      monthlyPrice: 29,
-      annualPrice: 290,
+      monthlyPrice: 399,
+      annualPrice: 3990,
       features: [
         "Up to 100 API keys",
         "Advanced analytics & insights",
@@ -45,8 +45,8 @@ const Pricing = ({ isAuthenticated }) => {
     {
       name: "Enterprise",
       description: "For large organizations with advanced security needs",
-      monthlyPrice: 99,
-      annualPrice: 990,
+      monthlyPrice: 999,
+      annualPrice: 9990,
       features: [
         "Unlimited API keys",
         "Real-time analytics & alerts",
@@ -68,7 +68,7 @@ const Pricing = ({ isAuthenticated }) => {
     if (plan.monthlyPrice === 0) return "Free";
     const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
     const period = isAnnual ? "/year" : "/month";
-    return `$${price}${period}`;
+    return `₹${price}${period}`;
   };
 
   const getSavings = (plan) => {
